@@ -7,9 +7,13 @@ sources:
     url: https://developers.google.com/search/blog/feed.xml
     tier: 1
     verticals: [digital_marketing]
-  - name: Google Ads Help (release notes)
-    url: https://support.google.com/google-ads/announcements/rss
+  - name: Google Ads Developer Blog
+    url: https://googleadsdeveloper.blogspot.com/feeds/posts/default
     tier: 1
+    verticals: [digital_marketing]
+  - name: Search Engine Land
+    url: https://searchengineland.com/feed
+    tier: 2
     verticals: [digital_marketing]
   - name: HubSpot Marketing Blog
     url: https://blog.hubspot.com/marketing/rss.xml
@@ -29,10 +33,10 @@ sources:
     url: https://openai.com/blog/rss.xml
     tier: 1
     verticals: [ai_automation]
-  - name: Anthropic News
-    url: https://www.anthropic.com/rss.xml
-    tier: 1
-    verticals: [ai_automation]
+  - name: TechCrunch AI
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+    tier: 2
+    verticals: [ai_automation, ventures]
   - name: GitHub Changelog
     url: https://github.blog/changelog/feed/
     tier: 1
