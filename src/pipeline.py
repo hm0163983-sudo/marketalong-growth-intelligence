@@ -53,6 +53,7 @@ def run_daily() -> dict:
     council_pack = build_pack(council_finding) if council_finding else None
 
     # 5. report + email (preview unless EMAIL_SEND_ENABLED=true)
+    sources_ok = sum(1 for h in health if h["ok"])
     subject, body = daily_brief(findings, opportunities, risks, council_pack, run_at)
     notable = [f for f in findings if f.band != "low_signal"]
     email_result = {"sent": False, "preview": ""}
@@ -63,7 +64,8 @@ def run_daily() -> dict:
     if notable:
         email_result = send(subject, body, report_id=f"daily-{datetime.now(timezone.utc):%Y%m%d}")
         # Free delivery path: write markdown brief for the workflow to post as a GitHub Issue.
-        md_title, md_body = daily_brief_markdown(findings, opportunities, risks, council_pack, run_at)
+        md_title, md_body = daily_brief_markdown(findings, opportunities, risks, council_pack, run_at,
+                                                 sources_ok=sources_ok, sources_total=len(health))
         (OUT / "brief_title.txt").write_text(md_title, encoding="utf-8")
         (OUT / "brief_body.md").write_text(md_body, encoding="utf-8")
     else:

@@ -79,14 +79,19 @@ def _gap_note(f: Finding) -> str:
 
 
 def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], risks: list[dict],
-                         council_pack: str | None, run_at_utc: str) -> tuple[str, str]:
+                         council_pack: str | None, run_at_utc: str,
+                         sources_ok: int = 0, sources_total: int = 0) -> tuple[str, str]:
     """Plain-English brief for GitHub Issue delivery. Anyone can read it. Returns (title, body)."""
     notable = sorted([f for f in findings if f.band != "low_signal"], key=lambda x: x.score, reverse=True)
     title = f"📋 Your MarketAlong Update — {datetime.now(IST):%d %b %Y}"
 
     L = [f"**Hi! Here's what happened in your industry today, in plain words.**",
-         f"_({_now_ist()})_\n",
-         "---\n"]
+         f"_({_now_ist()})_\n"]
+    # Coverage warning so you're never silently starved of updates.
+    if sources_total and (sources_total - sources_ok) >= 3:
+        L.append(f"> ⚠️ **Heads up:** only {sources_ok} of {sources_total} news sources worked today — "
+                 f"some updates may be missing. If this repeats, the source list needs a fix.\n")
+    L.append("---\n")
 
     # The headline takeaways
     L.append("## ⭐ The main things to know today\n")
@@ -146,7 +151,8 @@ def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], ris
                  "8 famous business experts will tell you exactly what to do, step by step.\n")
         L.append("```\n" + council_pack + "\n```")
 
-    L.append("\n---\n_This is your simple daily summary. It updates by itself every weekday morning — "
+    health = f"⚙️ {sources_ok}/{sources_total} news sources healthy. " if sources_total else ""
+    L.append(f"\n---\n_{health}This summary updates by itself every weekday morning — "
              "you don't have to do anything._")
     return title, "\n".join(L)
 
