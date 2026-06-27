@@ -47,7 +47,9 @@ jobs:
           if [ -s output/brief_body.md ]; then
             gh label create daily-brief --color 1565c0 --description "MarketAlong daily intelligence" --force || true
             gh issue create --title "$(cat output/brief_title.txt)" \
-              --body-file output/brief_body.md --label daily-brief
+              --body-file output/brief_body.md --label daily-brief \
+              --assignee hm0163983-sudo
+          # assignee guarantees an email notification on every brief
           else
             echo "No notable findings today — no issue posted."
           fi
