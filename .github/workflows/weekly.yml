@@ -1,0 +1,36 @@
+name: Weekly Growth Report
+
+# 02:30 UTC Monday = 08:00 IST Monday. Cron drifts ±15-30 min.
+on:
+  schedule:
+    - cron: "30 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Build weekly report
+        run: python -m scripts.run_weekly
+      - name: Deliver as GitHub Issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s output/brief_body.md ]; then
+            gh label create weekly-report --color 0d47a1 --description "MarketAlong weekly" --force || true
+            gh issue create --title "$(cat output/brief_title.txt)" \
+              --body-file output/brief_body.md --label weekly-report --assignee hm0163983-sudo
+          else
+            echo "No history yet — no weekly report."
+          fi

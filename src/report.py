@@ -151,6 +151,67 @@ def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], ris
     return title, "\n".join(L)
 
 
+def period_report_markdown(findings: list[Finding], opportunities: list[dict], risks: list[dict],
+                           council_pack: str | None, run_at_utc: str, period: str) -> tuple[str, str]:
+    """Weekly/monthly rollup in plain English. period = 'week' or 'month'."""
+    is_month = period == "month"
+    notable = sorted(findings, key=lambda x: x.score, reverse=True)
+    icon = "🗓️" if is_month else "📊"
+    word = "Monthly Strategy" if is_month else "Weekly Report"
+    title = f"{icon} Your MarketAlong {word} — {datetime.now(IST):%d %b %Y}"
+
+    L = [f"**Your MarketAlong {word.lower()}, in plain words.** _({_now_ist()})_\n", "---\n"]
+
+    # At-a-glance
+    gap_counts: dict[str, int] = {}
+    for f in notable:
+        if f.gap_id:
+            gap_counts[f.gap_id] = gap_counts.get(f.gap_id, 0) + 1
+    L.append(f"## 📈 The {period} at a glance\n")
+    L.append(f"- **{len(notable)}** important things happened in your industry")
+    L.append(f"- **{sum(gap_counts.values())}** of them help you get ahead on your goals")
+    L.append(f"- **{sum(1 for f in notable if f.ftype in ('risk', 'regulation'))}** are risks to watch\n")
+
+    # Gap scorecard — where you're moving vs still blind
+    all_gaps = load_profile().get("gaps") or []
+    if all_gaps:
+        L.append("## 🎯 Your stay-ahead scorecard\n")
+        for g in all_gaps:
+            n = gap_counts.get(g["id"], 0)
+            mark = "✅ moving" if n >= 2 else "🟡 some movement" if n == 1 else "🔴 blind spot — no movement"
+            L.append(f"- **{g['label']}** — {mark} ({n} item{'s' if n != 1 else ''})")
+        L.append("\n_🔴 blind spots are where competitors can pass you. Pick one to act on._\n")
+
+    # Biggest changes
+    L.append(f"## ⭐ Biggest changes this {period}\n")
+    for f in notable[:6]:
+        L.append(f"- **{f.title}** — _{FTYPE_PLAIN.get(f.ftype, 'News')}, {_plain_verts(f)}_. [Open]({f.url})")
+    L.append("")
+
+    # What to launch (month) / try (week)
+    if opportunities:
+        head = "## 🚀 What to launch this month" if is_month else "## 💡 What to try this week"
+        L.append(head + "\n")
+        for o in opportunities[:4]:
+            L.append(f"- **{o['suggested_offer']}** — charge ~{o['suggested_price']}. First step: {o['validation_plan']}")
+        L.append("")
+
+    if risks:
+        L.append("## ⚠️ Risks to handle\n")
+        for r in risks[:4]:
+            L.append(f"- **{r['title']}** — {r['mitigation']}")
+        L.append("")
+
+    if council_pack:
+        L.append(f"## 🧠 Your biggest decision this {period}\n")
+        L.append("Open **Claude**, type **`/billion-dollar-team`**, paste the box below. "
+                 "8 business experts will give you a full action plan.\n")
+        L.append("```\n" + council_pack + "\n```")
+
+    L.append(f"\n---\n_Automatic {period}ly report. Nothing for you to do — it builds itself._")
+    return title, "\n".join(L)
+
+
 def _esc(s: str) -> str:
     return html.escape(s or "")
 

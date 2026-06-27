@@ -58,6 +58,6 @@ jobs:
         run: |
           git config user.name "marketalong-bot"
           git config user.email "actions@github.com"
-          git add output/state.json || true
-          git commit -m "chore: update run state [skip ci]" || echo "no state change"
+          git add output/state.json output/history.jsonl || true
+          git commit -m "chore: update run state + history [skip ci]" || echo "no state change"
           git push || echo "nothing to push"

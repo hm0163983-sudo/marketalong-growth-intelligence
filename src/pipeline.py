@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from . import config_loader, state
+from . import config_loader, state, history
 from .collectors import rss, competitor
 from .classify import classify
 from .scoring import score
@@ -70,6 +70,8 @@ def run_daily() -> dict:
         log.info("no notable findings -> no brief")
 
     # 6. persist
+    if notable:
+        history.append(notable)  # feeds weekly/monthly rollups
     write_findings(findings, health, opportunities, risks, council_pack)
     state.save(seen, new_hashes)
 
@@ -83,6 +85,36 @@ def run_daily() -> dict:
     }
     log.info("DONE: %s", summary)
     return summary
+
+
+def run_period(period: str) -> dict:
+    """Weekly ('week', 7d) or monthly ('month', 30d) rollup from stored history.
+    No fresh collection — summarizes what the daily runs already gathered."""
+    run_at = datetime.now(timezone.utc).isoformat()
+    days = 30 if period == "month" else 7
+    findings = history.load_findings(days)
+    log.info("%s rollup: %d findings in last %dd", period, len(findings), days)
+
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "brief_title.txt").write_text("", encoding="utf-8")
+    (OUT / "brief_body.md").write_text("", encoding="utf-8")
+    if not findings:
+        log.info("no history yet -> no %s report", period)
+        return {"period": period, "findings": 0, "posted": False}
+
+    opportunities = sorted(build_opportunities(findings), key=lambda o: o["score"], reverse=True)
+    risks = sorted(build_risks(findings), key=lambda r: r["severity"], reverse=True)
+    council_finding = pick_for_council(findings)
+    council_pack = build_pack(council_finding) if council_finding else None
+
+    from .report import period_report_markdown
+    title, body = period_report_markdown(findings, opportunities, risks, council_pack, run_at, period)
+    (OUT / "brief_title.txt").write_text(title, encoding="utf-8")
+    (OUT / "brief_body.md").write_text(body, encoding="utf-8")
+    # also email if SMTP enabled, reusing HTML daily layout's send path with markdown->simple wrap
+    log.info("%s report ready: %s", period, title)
+    return {"period": period, "findings": len(findings), "opportunities": len(opportunities),
+            "risks": len(risks), "posted": True}
 
 
 if __name__ == "__main__":
