@@ -1,10 +1,40 @@
-# Competitor watchlist. competitor.py hashes each url daily; reports meaningful change.
-# priority: 1 high .. 3 low. Add your real competitors here.
+# Competitor watchlist — real Mysuru/Karnataka digital-marketing & AI agencies.
+# competitor.py hashes each url daily and alerts when content meaningfully changes
+# (pricing / services / positioning). Researched 2026-06-27. Edit freely.
+# priority: 1 = closest competitor (watch hardest) .. 3 = loose.
 competitors:
-  - name: Example Agency
-    priority: 2
-    verticals: [digital_marketing, ai_automation]
+  - name: OneCity Technologies
+    priority: 1
+    verticals: [digital_marketing, ai_automation, app_development]
     urls:
-      - https://example.com/pricing
-      - https://example.com/services
-    notes: "Replace with real competitor. Use pricing + services pages."
+      - https://onecity.co.in/digital-marketing-company-in-mysore
+    notes: "Pushes GEO/AEO/SGE + AI marketing — competes directly on your AI-search-visibility gap. Watch closely."
+
+  - name: NJ Graphica
+    priority: 1
+    verticals: [digital_marketing, studio, media]
+    urls:
+      - https://njgraphica.com/
+      - https://njgraphica.com/top-10-digital-marketing-agencies-in-mysuru
+    notes: "Full-service creative + performance under one roof — closest to MarketAlong's multi-vertical model."
+
+  - name: Techasoft
+    priority: 2
+    verticals: [digital_marketing, app_development]
+    urls:
+      - https://www.techasoft.com/digital-marketing-company-in-mysore
+    notes: "High-rated (4.8), marketing + development. Competes on App Dev + Digital Marketing."
+
+  - name: Crisant Technologies
+    priority: 2
+    verticals: [digital_marketing]
+    urls:
+      - https://crisant.com/
+    notes: "16+ yrs, Mysore-based, data-driven SEO for local businesses."
+
+  - name: Extro Marketing
+    priority: 3
+    verticals: [digital_marketing]
+    urls:
+      - https://extromarketing.in/best-digital-marketing-company-in-mysore/
+    notes: "Mysore agency, brand transformation positioning."
