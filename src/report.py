@@ -14,39 +14,79 @@ def _now_ist() -> str:
     return datetime.now(IST).strftime("%Y-%m-%d %H:%M IST")
 
 
+# Plain-English translations so a non-technical reader understands instantly.
+FTYPE_PLAIN = {
+    "platform_update": "A tool you use changed something",
+    "tool_update": "A new tool or update is out",
+    "risk": "⚠️ This could affect your business",
+    "regulation": "⚠️ A new rule or policy",
+    "competitor_move": "A competitor made a move",
+    "opportunity": "A possible opportunity",
+    "market_signal": "Industry news",
+}
+VERT_PLAIN = {
+    "digital_marketing": "Marketing & Ads", "ai_automation": "AI & Automation",
+    "marketverse": "Marketplace", "app_development": "Apps & Websites",
+    "shop": "Online Store", "learn": "Courses & Content", "studio": "Design",
+    "finance_ops": "Finance & Admin", "media": "Video & Content", "ventures": "New Ideas",
+}
+BAND_PLAIN = {"critical": "🔥 Big deal", "high": "⭐ Worth your attention", "watchlist": "👀 Keep an eye on it"}
+
+
+def _plain_verts(f: Finding) -> str:
+    names = [VERT_PLAIN.get(v, v) for v in f.verticals]
+    return ", ".join(dict.fromkeys(names)) or "your business"
+
+
 def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], risks: list[dict],
                          council_pack: str | None, run_at_utc: str) -> tuple[str, str]:
-    """Markdown version for GitHub Issue delivery (free, no SMTP). Returns (title, body)."""
+    """Plain-English brief for GitHub Issue delivery. Anyone can read it. Returns (title, body)."""
     notable = sorted([f for f in findings if f.band != "low_signal"], key=lambda x: x.score, reverse=True)
-    crit = [f for f in notable if f.band == "critical"]
-    title = f"MarketAlong Daily Brief · {datetime.now(IST):%Y-%m-%d} · {len(notable)} signals · {len(crit)} critical"
+    title = f"📋 Your MarketAlong Update — {datetime.now(IST):%d %b %Y}"
 
-    lines = [f"_Generated {_now_ist()} (run UTC {run_at_utc}). Low-signal suppressed._\n"]
+    L = [f"**Hi! Here's what happened in your industry today, in plain words.**",
+         f"_({_now_ist()})_\n",
+         "---\n"]
 
-    lines.append("## Do This Today")
-    actions = [f"- Validate: **{o['name']}** ({o['recommendation']}, {o['suggested_price']})" for o in opportunities[:3]]
-    actions += [f"- ⚠ Act on risk: **{r['title']}**" for r in risks[:2] if r["status"] == "act"]
-    lines += (actions[:3] or ["- No high-priority action today."])
+    # The headline takeaways
+    L.append("## ⭐ The main things to know today\n")
+    if notable:
+        for i, f in enumerate(notable[:5], 1):
+            tag = BAND_PLAIN.get(f.band, "")
+            L.append(f"**{i}. {f.title}**  \n"
+                     f"{FTYPE_PLAIN.get(f.ftype, 'News')} — about *{_plain_verts(f)}*. {tag}  \n"
+                     f"👉 [Read the full thing here]({f.url})\n")
+    else:
+        L.append("_Nothing major today. That's normal — quiet days happen._\n")
 
-    lines.append("\n## Top Signals")
-    for f in notable[:5]:
-        lines.append(f"- `{f.band.upper()} {f.score}` [{f.title}]({f.url}) — _{f.source} · {f.ftype} · {', '.join(f.verticals) or '—'}_")
-
+    # Money ideas
     if opportunities:
-        lines.append("\n## Opportunities")
+        L.append("## 💡 Ideas you could make money from\n")
         for o in opportunities[:3]:
-            lines.append(f"- **{o['name']}** — {o['recommendation']}, {o['suggested_price']}\n  - {o['validation_plan']}")
+            spark = o.get("why_now", "")[:70]
+            push = "**Looks promising — try it.**" if o["recommendation"] == "pursue" else "Worth thinking about."
+            L.append(f"- **You could offer clients:** {o['suggested_offer']}  \n"
+                     f"  💰 You could charge around **{o['suggested_price']}**. {push}  \n"
+                     f"  _Why now: {spark}_  \n"
+                     f"  ▶️ First step: {o['validation_plan']}\n")
 
-    if risks:
-        lines.append("\n## Risks")
-        for r in risks[:3]:
-            lines.append(f"- **{r['title']}** — sev {r['severity']}, {r['status']} — _{r['mitigation']}_")
+    # Watch-outs
+    act_risks = [r for r in risks if r["status"] == "act"] + [r for r in risks if r["status"] != "act"]
+    if act_risks:
+        L.append("## ⚠️ Things to watch out for\n")
+        for r in act_risks[:3]:
+            L.append(f"- **{r['title']}**  \n  What to do: {r['mitigation']}\n")
 
+    # The smart-advice box, explained for a beginner
     if council_pack:
-        lines.append("\n## 🧠 Strategic Council Pack\n_Paste into Claude Code → `/billion-dollar-team`._\n")
-        lines.append("```markdown\n" + council_pack + "\n```")
+        L.append("## 🧠 Want expert business advice on today's biggest item?\n")
+        L.append("Copy the grey box below. Open **Claude**, type **`/billion-dollar-team`**, and paste it. "
+                 "8 famous business experts will tell you exactly what to do, step by step.\n")
+        L.append("```\n" + council_pack + "\n```")
 
-    return title, "\n".join(lines)
+    L.append("\n---\n_This is your simple daily summary. It updates by itself every weekday morning — "
+             "you don't have to do anything._")
+    return title, "\n".join(L)
 
 
 def _esc(s: str) -> str:
