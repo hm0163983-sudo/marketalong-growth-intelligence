@@ -12,7 +12,7 @@ permissions:
   issues: write              # post the daily brief as an issue (free delivery, no SMTP)
 
 concurrency:
-  group: daily
+  group: marketalong-state   # shared lock with critical-alert workflow (no state.json races)
   cancel-in-progress: false
 
 jobs:

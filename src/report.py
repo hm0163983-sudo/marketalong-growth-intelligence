@@ -151,6 +151,36 @@ def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], ris
     return title, "\n".join(L)
 
 
+def critical_alert_markdown(criticals: list[Finding], council_pack: str | None,
+                            run_at_utc: str) -> tuple[str, str]:
+    """URGENT alert — only fires for score>=85 tier-1 items. Plain, action-first."""
+    top = criticals[0]
+    title = f"🚨 URGENT: MarketAlong — {top.title[:70]}"
+    L = [f"**🚨 Something important just happened. Read this now.** _({_now_ist()})_\n", "---\n"]
+    for f in criticals:
+        summary = _clean_summary(f.summary)
+        L.append(f"### {f.title}")
+        L.append(f"_About {_plain_verts(f)}. Importance score: {f.score}/100._\n")
+        if summary:
+            L.append(f"**What happened:** {summary}\n")
+        gap = _gap_note(f)
+        if gap:
+            L.append(gap + "\n")
+        cap = _capability_note(f)
+        if cap:
+            L.append(cap + "\n")
+        L.append(f"**Why it's urgent:** this is a major change in something you rely on. "
+                 f"Acting early keeps you ahead; ignoring it lets competitors react first.\n")
+        L.append(f"_Source: {f.source}. [Open it]({f.url})_\n")
+
+    if council_pack:
+        L.append("## 🧠 Get an expert action plan now\n")
+        L.append("Open **Claude**, type **`/billion-dollar-team`**, paste the box:\n")
+        L.append("```\n" + council_pack + "\n```")
+    L.append("\n---\n_You only get this email when something is genuinely big (rare by design)._")
+    return title, "\n".join(L)
+
+
 def period_report_markdown(findings: list[Finding], opportunities: list[dict], risks: list[dict],
                            council_pack: str | None, run_at_utc: str, period: str) -> tuple[str, str]:
     """Weekly/monthly rollup in plain English. period = 'week' or 'month'."""

@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from . import config_loader, state, history
 from .collectors import rss, competitor
 from .classify import classify
-from .scoring import score
+from .scoring import score, is_critical_alert
 from .dedup import filter_new
 from .opportunities import build_all as build_opportunities
 from .risks import build_all as build_risks
@@ -85,6 +85,40 @@ def run_daily() -> dict:
     }
     log.info("DONE: %s", summary)
     return summary
+
+
+def run_critical() -> dict:
+    """Fast RSS-only check for genuine criticals (score>=85, tier-1). Posts an URGENT
+    issue immediately. Marks ONLY the criticals as seen so the daily brief still reports
+    everything else. Leaves competitor hashes untouched (daily owns those)."""
+    run_at = datetime.now(timezone.utc).isoformat()
+    st = state.load()
+    seen = set(st.get("seen", []))
+    rss_findings, _ = rss.collect_all(config_loader.sources())
+    new, _ = filter_new(rss_findings, seen)
+    for f in new:
+        classify(f)
+        score(f)
+    criticals = sorted([f for f in new if is_critical_alert(f)], key=lambda x: x.score, reverse=True)
+
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "brief_title.txt").write_text("", encoding="utf-8")
+    (OUT / "brief_body.md").write_text("", encoding="utf-8")
+    if not criticals:
+        log.info("no criticals this check")
+        return {"criticals": 0, "posted": False}
+
+    from .report import critical_alert_markdown
+    council_pack = build_pack(criticals[0])
+    title, body = critical_alert_markdown(criticals, council_pack, run_at)
+    (OUT / "brief_title.txt").write_text(title, encoding="utf-8")
+    (OUT / "brief_body.md").write_text(body, encoding="utf-8")
+
+    seen |= {c.fingerprint for c in criticals}   # don't re-alert the same item
+    history.append(criticals)
+    state.save(seen, st.get("competitor_hashes", {}))  # preserve competitor hashes
+    log.info("CRITICAL: %d alert(s) -> %s", len(criticals), title)
+    return {"criticals": len(criticals), "posted": True}
 
 
 def run_period(period: str) -> dict:

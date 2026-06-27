@@ -1,0 +1,50 @@
+name: Critical Alert Check
+
+# Extra checks through the day: 06:30, 09:30, 12:30 IST (01:00, 04:00, 07:00 UTC), weekdays.
+# Only emails if something genuinely scores 85+ from a tier-1 source. Usually posts nothing.
+on:
+  schedule:
+    - cron: "0 1,4,7 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+# Shared lock with the daily workflow so they never push state.json at the same time.
+concurrency:
+  group: marketalong-state
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Check for criticals
+        run: python -m scripts.run_critical
+      - name: Send URGENT alert if any
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s output/brief_body.md ]; then
+            gh label create critical-alert --color b71c1c --description "MarketAlong urgent" --force || true
+            gh issue create --title "$(cat output/brief_title.txt)" \
+              --body-file output/brief_body.md --label critical-alert --assignee hm0163983-sudo
+          else
+            echo "No criticals — nothing sent (normal)."
+          fi
+      - name: Persist state
+        run: |
+          git config user.name "marketalong-bot"
+          git config user.email "actions@github.com"
+          git add output/state.json output/history.jsonl || true
+          git commit -m "chore: critical-check state [skip ci]" || echo "no change"
+          git pull --rebase -X ours origin main || true
+          git push || echo "nothing to push"
