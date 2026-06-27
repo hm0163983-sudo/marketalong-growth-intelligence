@@ -1,0 +1,57 @@
+# MarketAlong source list. Add/remove freely — no code change needed.
+# tier: source reliability 1 (highest, official) .. 3 (lower). Affects confidence + score.
+# type rss = parsed by feedparser. type page = HTML change-watch (competitor.py handles those).
+sources:
+  # --- Digital Marketing ---
+  - name: Google Search Central Blog
+    url: https://developers.google.com/search/blog/feed.xml
+    tier: 1
+    verticals: [digital_marketing]
+  - name: Google Ads Help (release notes)
+    url: https://support.google.com/google-ads/announcements/rss
+    tier: 1
+    verticals: [digital_marketing]
+  - name: HubSpot Marketing Blog
+    url: https://blog.hubspot.com/marketing/rss.xml
+    tier: 2
+    verticals: [digital_marketing]
+  - name: Shopify Changelog
+    url: https://changelog.shopify.com/feed
+    tier: 1
+    verticals: [shop, app_development]
+  - name: WordPress News
+    url: https://wordpress.org/news/feed/
+    tier: 1
+    verticals: [app_development, digital_marketing]
+
+  # --- AI Automation ---
+  - name: OpenAI Blog
+    url: https://openai.com/blog/rss.xml
+    tier: 1
+    verticals: [ai_automation]
+  - name: Anthropic News
+    url: https://www.anthropic.com/rss.xml
+    tier: 1
+    verticals: [ai_automation]
+  - name: GitHub Changelog
+    url: https://github.blog/changelog/feed/
+    tier: 1
+    verticals: [ai_automation, app_development]
+  - name: n8n Blog
+    url: https://n8n.io/blog/rss/
+    tier: 2
+    verticals: [ai_automation]
+  - name: Zapier Blog
+    url: https://zapier.com/blog/feeds/latest/
+    tier: 2
+    verticals: [ai_automation]
+  - name: Vercel Changelog
+    url: https://vercel.com/atom
+    tier: 1
+    verticals: [app_development, ai_automation]
+
+  # --- Product / business discovery ---
+  - name: Product Hunt
+    url: https://www.producthunt.com/feed
+    tier: 2
+    verticals: [ventures, ai_automation, app_development]

@@ -1,0 +1,24 @@
+# Transparent scoring. Max points per factor sum to 100. Edit to retune.
+weights:
+  revenue_potential: 25
+  strategic_relevance: 20
+  urgency: 15
+  competitive_advantage: 15
+  ease_of_implementation: 10
+  risk_of_ignoring: 10
+  source_confidence: 5
+
+# Score bands -> label. Low signal is NOT emailed.
+bands:
+  critical: 85
+  high: 70
+  watchlist: 45
+  # below watchlist = low_signal
+
+# Critical email gate.
+critical_alert:
+  min_score: 85
+  min_source_confidence_tier: 1   # tier 1 only (=confidence >=7/10)
+
+# Verticals MarketAlong weights most heavily for strategic_relevance.
+core_verticals: [digital_marketing, ai_automation, app_development, marketverse]

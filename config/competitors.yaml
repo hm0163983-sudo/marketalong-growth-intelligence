@@ -1,0 +1,10 @@
+# Competitor watchlist. competitor.py hashes each url daily; reports meaningful change.
+# priority: 1 high .. 3 low. Add your real competitors here.
+competitors:
+  - name: Example Agency
+    priority: 2
+    verticals: [digital_marketing, ai_automation]
+    urls:
+      - https://example.com/pricing
+      - https://example.com/services
+    notes: "Replace with real competitor. Use pricing + services pages."

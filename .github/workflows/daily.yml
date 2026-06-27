@@ -1,0 +1,48 @@
+name: Daily Intelligence Brief
+
+# 03:00 UTC = 08:30 IST (Asia/Kolkata, UTC+5:30). GitHub cron drifts ±15-30 min.
+# Actual run time is recorded in the report + state.json.
+on:
+  schedule:
+    - cron: "0 3 * * 1-5"   # Mon-Fri 08:30 IST
+  workflow_dispatch:         # manual test button
+
+permissions:
+  contents: write            # least privilege: only needs to commit state.json back
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Run daily pipeline
+        env:
+          EMAIL_SEND_ENABLED: ${{ secrets.EMAIL_SEND_ENABLED }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: python -m scripts.run_daily
+
+      - name: Persist dedup/competitor state
+        run: |
+          git config user.name "marketalong-bot"
+          git config user.email "actions@github.com"
+          git add output/state.json || true
+          git commit -m "chore: update run state [skip ci]" || echo "no state change"
+          git push || echo "nothing to push"

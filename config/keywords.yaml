@@ -1,0 +1,23 @@
+# Deterministic classification taxonomy. All lowercase. Edit freely.
+verticals:
+  digital_marketing: [seo, "google ads", "meta ads", "linkedin ads", ppc, "search console", serp, backlink, "social media", "lead gen", "content marketing", "conversion", "landing page", analytics, "tag manager", ga4]
+  ai_automation: [agent, "ai bot", chatbot, automation, workflow, "crm automation", "lead nurtur", "sales automation", llm, "gpt", claude, "model", "api", rag, "fine-tun", copilot, n8n, zapier, make]
+  marketverse: [marketplace, "vendor", "service listing", "digital product", template]
+  app_development: ["mobile app", "web app", "ui/ux", saas, "product build", deploy, framework, sdk]
+  shop: [ecommerce, "online store", "product sales", shopify, checkout, cart]
+  learn: [course, blog, training, tutorial, "knowledge"]
+  studio: [creative, catalogue, brochure, branding, design]
+  finance_ops: [accounting, invoice, "financial report", billing, payment]
+  media: ["content production", "campaign media", video, "brand communication"]
+  ventures: [startup, "new product", launch, funding, incubat, "growth project"]
+
+# Finding type signals (checked in order; first match wins, else market_signal).
+types:
+  risk: [deprecat, "shutting down", "shut down", "discontinu", "price increase", "pricing change", breach, outage, "policy change", "privacy", restrict, ban, "rate limit", sunset, "end of life", removed]
+  regulation: [gdpr, regulation, compliance, "law", policy, ftc, "data protection", consent]
+  platform_update: ["release", "update", "now available", "introducing", "changelog", "new feature", "rolling out", "ga ", "general availability"]
+  tool_update: ["v1", "v2", "version", "beta", "launch", "open source", "open-source"]
+  opportunity: ["new market", "demand", "trend", "growing", "opportunity"]
+
+# Urgency boosters (presence raises urgency score).
+urgency_high: [deprecat, breach, outage, "shutting down", "immediately", "action required", "urgent", "end of life", sunset, "policy change"]
