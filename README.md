@@ -38,7 +38,7 @@ No secrets → preview-only, Sheets skipped, nothing emailed. Safe.
 2. **Google Sheet** — create one named `MarketAlong Growth Intelligence Command Center`. Copy its ID from the URL.
 3. **Service account** — Google Cloud Console → new project → enable Google Sheets API → create service account → JSON key. **Share the Sheet with the service-account email (Editor).** Paste the JSON (one line) into Secret `GOOGLE_SERVICE_ACCOUNT_JSON`.
 4. **GitHub repo (private)** → Settings → Secrets and variables → Actions. Add:
-   `EMAIL_SEND_ENABLED=true`, `EMAIL_RECIPIENT=hmehta4851@gmail.com`,
+   `EMAIL_SEND_ENABLED=true`, `EMAIL_RECIPIENT=you@example.com`,
    `SMTP_USERNAME`, `SMTP_APP_PASSWORD`, `SMTP_FROM`,
    `GOOGLE_SERVICE_ACCOUNT_JSON`, `GOOGLE_SHEET_ID`.
 5. Push repo → Actions tab → run **Daily Intelligence Brief** manually to test.

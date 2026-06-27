@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from ..models import Finding
 
 log = logging.getLogger("collectors.competitor")
-UA = "MarketAlongGrowthIntel/1.0 (+research bot; contact hmehta4851@gmail.com)"
+UA = "MarketAlongGrowthIntel/1.0 (+research bot; research contact via repo owner)"
 TIMEOUT = 20
 
 

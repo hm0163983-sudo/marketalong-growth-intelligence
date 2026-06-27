@@ -10,7 +10,7 @@ from ..models import Finding
 
 log = logging.getLogger("collectors.rss")
 
-UA = "MarketAlongGrowthIntel/1.0 (+https://marketalong.example; research bot; contact hmehta4851@gmail.com)"
+UA = "MarketAlongGrowthIntel/1.0 (+https://marketalong.example; research bot; research contact via repo owner)"
 
 
 def _published(entry) -> str:

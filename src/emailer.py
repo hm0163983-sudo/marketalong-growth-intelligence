@@ -20,7 +20,7 @@ def _enabled() -> bool:
 
 def send(subject: str, html_body: str, report_id: str = "report") -> dict:
     """Send via Gmail SMTP if EMAIL_SEND_ENABLED=true, else write preview file."""
-    recipient = os.getenv("EMAIL_RECIPIENT", "hmehta4851@gmail.com")
+    recipient = os.getenv("EMAIL_RECIPIENT", "")
     result = {"report_id": report_id, "recipient": recipient, "sent": False,
               "preview": "", "ts": datetime.now(timezone.utc).isoformat()}
 
