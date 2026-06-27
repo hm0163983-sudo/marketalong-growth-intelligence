@@ -26,8 +26,34 @@ profile:
     seo: "your SEO work"
     shopify: "online stores (your Shop vertical)"
     wordpress: "websites you build"
-    n8n: "automation tools"
+    n8n: "your n8n automation"
     zapier: "automation tools"
+    lemlist: "your Lemlist cold-email"
+    stripe: "your Stripe payments"
+    slack: "your Slack"
+    perplexity: "your Perplexity AI"
+    peopledatalabs: "your PeopleDataLabs lead enrichment"
+    firecrawl: "your Firecrawl web research"
+
+  # The 5 gaps that decide whether MarketAlong stays ahead. If a news item helps
+  # close one, the brief flags "🎯 this closes a gap" AND ranks it higher.
+  # id · label (plain) · keywords to match (lowercase).
+  gaps:
+    - id: ai_search_visibility
+      label: "Getting found INSIDE AI answers (ChatGPT, Perplexity, Google AI) — not just Google search"
+      keywords: ["generative", "ai overview", "ai search", "perplexity", "answer engine", "aeo", "llm", "chatgpt", "gemini", "ai mode"]
+    - id: attribution
+      label: "Proving which marketing actually drives sales (tracking & attribution)"
+      keywords: ["attribution", "server-side", "consent", "privacy", "cookie", "measurement", "conversion tracking", "ga4", "first-party"]
+    - id: productized_automation
+      label: "Turning your automation stack (n8n, HubSpot, Lemlist) into repeatable services you can sell"
+      keywords: ["ai agent", "agent", "automation", "workflow", "n8n", "no-code", "rag", "mcp"]
+    - id: short_form_video
+      label: "Short-form video content that grows reach"
+      keywords: ["short-form", "reels", "shorts", "tiktok", "video", "creator"]
+    - id: lead_quality
+      label: "Higher-quality leads using enrichment & intent data"
+      keywords: ["lead", "enrichment", "intent data", "outbound", "icp", "prospect"]
 
   # How the brief should phrase the 'get expert advice' helper, for a beginner.
   ai_helpers_note: >

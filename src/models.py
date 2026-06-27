@@ -40,6 +40,7 @@ class Finding:
     score: int = 0
     risk_score: int = 0
     band: str = "low_signal"
+    gap_id: str = ""
     score_factors: dict = field(default_factory=dict)
 
     @property

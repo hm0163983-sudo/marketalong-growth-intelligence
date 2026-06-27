@@ -65,6 +65,19 @@ def _capability_note(f: Finding) -> str:
     return ""
 
 
+def _gap_label(gap_id: str) -> str:
+    for g in (load_profile().get("gaps") or []):
+        if g["id"] == gap_id:
+            return g["label"]
+    return ""
+
+
+def _gap_note(f: Finding) -> str:
+    if not f.gap_id:
+        return ""
+    return f"🎯 **Stay-ahead move:** this helps you close a gap — _{_gap_label(f.gap_id)}_."
+
+
 def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], risks: list[dict],
                          council_pack: str | None, run_at_utc: str) -> tuple[str, str]:
     """Plain-English brief for GitHub Issue delivery. Anyone can read it. Returns (title, body)."""
@@ -86,12 +99,27 @@ def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], ris
                      f"_{FTYPE_PLAIN.get(f.ftype, 'News')} — about {_plain_verts(f)}. {tag}_\n"]
             if summary:
                 block.append(f"**What happened:** {summary}\n")
+            gap = _gap_note(f)
+            if gap:
+                block.append(gap + "\n")
             if cap:
                 block.append(cap + "\n")
             block.append(f"_Source: {f.source}. Want the original? [Open it here]({f.url})_\n")
             L.append("\n".join(block))
     else:
         L.append("_Nothing major today. That's normal — quiet days happen._\n")
+
+    # Stay-ahead roundup: which of the user's gaps saw movement today
+    gap_hits = {}
+    for f in notable:
+        if f.gap_id:
+            gap_hits.setdefault(f.gap_id, f)  # keep highest-scored per gap (notable is sorted)
+    if gap_hits:
+        L.append("## 🎯 How to stay ahead this week\n")
+        L.append("_These items move you toward gaps we identified for MarketAlong:_\n")
+        for gid, f in gap_hits.items():
+            L.append(f"- **{_gap_label(gid)}**  \n  → See item above: *{f.title}*")
+        L.append("")
 
     # Money ideas
     if opportunities:

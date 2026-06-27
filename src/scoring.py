@@ -1,12 +1,21 @@
 """Transparent 0-100 scoring. Every factor stored separately for audit."""
 from __future__ import annotations
 
-from .config_loader import scoring as scoring_cfg
+from .config_loader import scoring as scoring_cfg, profile as load_profile
 from .models import Finding
 
 
 def _clamp(v: float, hi: float) -> int:
     return int(max(0, min(hi, round(v))))
+
+
+def gap_match(f: Finding) -> str:
+    """Return the gap id this finding helps close, or '' . Used to rank + flag gap-closers."""
+    text = f"{f.title} {f.summary}".lower()
+    for gap in (load_profile().get("gaps") or []):
+        if any(k in text for k in gap.get("keywords", [])):
+            return gap["id"]
+    return ""
 
 
 def score(f: Finding) -> Finding:
@@ -38,11 +47,17 @@ def score(f: Finding) -> Finding:
             w["risk_of_ignoring"]),
         "source_confidence": _clamp(w["source_confidence"] * (f.confidence / 10), w["source_confidence"]),
     }
+    # Gap bonus: news that closes one of the user's stay-ahead gaps matters more.
+    gid = gap_match(f)
+    factors["gap_relevance"] = 12 if gid else 0
+    f.gap_id = gid
+
     f.score_factors = factors
     raw = sum(factors.values())
     # Decisions over volume: a generic post with no event keyword is just noise.
     # Dampen market_signal so only real updates/risks/competitor/opportunity moves clear the bar.
-    f.score = int(round(raw * 0.55)) if f.ftype == "market_signal" else raw
+    # A gap-closer is never dampened — it's exactly what the user asked to see.
+    f.score = raw if (f.ftype != "market_signal" or gid) else int(round(raw * 0.55))
 
     # separate risk score 0..100
     sev = {"risk": 70, "regulation": 65, "competitor_move": 45}.get(f.ftype, 10)
