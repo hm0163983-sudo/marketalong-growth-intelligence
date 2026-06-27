@@ -12,9 +12,13 @@ from .dedup import filter_new
 from .opportunities import build_all as build_opportunities
 from .risks import build_all as build_risks
 from .council import build_pack, pick_for_council
-from .report import daily_brief
+from .report import daily_brief, daily_brief_markdown
 from .emailer import send
 from .sheets import write_findings
+
+from pathlib import Path
+
+OUT = Path(__file__).resolve().parent.parent / "output"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger("pipeline")
@@ -52,10 +56,18 @@ def run_daily() -> dict:
     subject, body = daily_brief(findings, opportunities, risks, council_pack, run_at)
     notable = [f for f in findings if f.band != "low_signal"]
     email_result = {"sent": False, "preview": ""}
+    OUT.mkdir(parents=True, exist_ok=True)
+    # Always clear stale brief so the workflow only posts when there's real news.
+    (OUT / "brief_title.txt").write_text("", encoding="utf-8")
+    (OUT / "brief_body.md").write_text("", encoding="utf-8")
     if notable:
         email_result = send(subject, body, report_id=f"daily-{datetime.now(timezone.utc):%Y%m%d}")
+        # Free delivery path: write markdown brief for the workflow to post as a GitHub Issue.
+        md_title, md_body = daily_brief_markdown(findings, opportunities, risks, council_pack, run_at)
+        (OUT / "brief_title.txt").write_text(md_title, encoding="utf-8")
+        (OUT / "brief_body.md").write_text(md_body, encoding="utf-8")
     else:
-        log.info("no notable findings -> no email")
+        log.info("no notable findings -> no brief")
 
     # 6. persist
     write_findings(findings, health, opportunities, risks, council_pack)

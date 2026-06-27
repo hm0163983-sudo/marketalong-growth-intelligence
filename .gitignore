@@ -5,3 +5,6 @@ __pycache__/
 output/previews/
 .venv/
 venv/
+
+output/brief_title.txt
+output/brief_body.md

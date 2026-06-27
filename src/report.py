@@ -14,6 +14,41 @@ def _now_ist() -> str:
     return datetime.now(IST).strftime("%Y-%m-%d %H:%M IST")
 
 
+def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], risks: list[dict],
+                         council_pack: str | None, run_at_utc: str) -> tuple[str, str]:
+    """Markdown version for GitHub Issue delivery (free, no SMTP). Returns (title, body)."""
+    notable = sorted([f for f in findings if f.band != "low_signal"], key=lambda x: x.score, reverse=True)
+    crit = [f for f in notable if f.band == "critical"]
+    title = f"MarketAlong Daily Brief · {datetime.now(IST):%Y-%m-%d} · {len(notable)} signals · {len(crit)} critical"
+
+    lines = [f"_Generated {_now_ist()} (run UTC {run_at_utc}). Low-signal suppressed._\n"]
+
+    lines.append("## Do This Today")
+    actions = [f"- Validate: **{o['name']}** ({o['recommendation']}, {o['suggested_price']})" for o in opportunities[:3]]
+    actions += [f"- ⚠ Act on risk: **{r['title']}**" for r in risks[:2] if r["status"] == "act"]
+    lines += (actions[:3] or ["- No high-priority action today."])
+
+    lines.append("\n## Top Signals")
+    for f in notable[:5]:
+        lines.append(f"- `{f.band.upper()} {f.score}` [{f.title}]({f.url}) — _{f.source} · {f.ftype} · {', '.join(f.verticals) or '—'}_")
+
+    if opportunities:
+        lines.append("\n## Opportunities")
+        for o in opportunities[:3]:
+            lines.append(f"- **{o['name']}** — {o['recommendation']}, {o['suggested_price']}\n  - {o['validation_plan']}")
+
+    if risks:
+        lines.append("\n## Risks")
+        for r in risks[:3]:
+            lines.append(f"- **{r['title']}** — sev {r['severity']}, {r['status']} — _{r['mitigation']}_")
+
+    if council_pack:
+        lines.append("\n## 🧠 Strategic Council Pack\n_Paste into Claude Code → `/billion-dollar-team`._\n")
+        lines.append("```markdown\n" + council_pack + "\n```")
+
+    return title, "\n".join(lines)
+
+
 def _esc(s: str) -> str:
     return html.escape(s or "")
 

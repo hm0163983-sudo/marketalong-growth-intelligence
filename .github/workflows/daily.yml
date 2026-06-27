@@ -8,7 +8,8 @@ on:
   workflow_dispatch:         # manual test button
 
 permissions:
-  contents: write            # least privilege: only needs to commit state.json back
+  contents: write            # commit state.json back
+  issues: write              # post the daily brief as an issue (free delivery, no SMTP)
 
 concurrency:
   group: daily
@@ -38,6 +39,18 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: python -m scripts.run_daily
+
+      - name: Deliver brief as GitHub Issue (free, no SMTP needed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s output/brief_body.md ]; then
+            gh label create daily-brief --color 1565c0 --description "MarketAlong daily intelligence" --force || true
+            gh issue create --title "$(cat output/brief_title.txt)" \
+              --body-file output/brief_body.md --label daily-brief
+          else
+            echo "No notable findings today — no issue posted."
+          fi
 
       - name: Persist dedup/competitor state
         run: |
