@@ -1,0 +1,35 @@
+# Your capability profile. The daily brief reads this to tailor language + flag
+# news that touches tools you already have. Edit freely as your setup changes.
+profile:
+  skill_level: non_technical_business_owner
+  summary: >
+    Runs MarketAlong, a digital-marketing agency. Strong on marketing, ads,
+    content, and business decisions. Uses AI chat tools comfortably. Does NOT
+    read code or use the command line. Wants plain-English, decision-ready info
+    with no jargon and no need to click external links.
+
+  # Tools/platforms you already use or have connected. If a news item mentions one,
+  # the brief says "✅ you already use this" so you know it's directly relevant.
+  # key = word to look for (lowercase) · value = how the brief refers to it.
+  tools_you_have:
+    hubspot: "your HubSpot CRM"
+    canva: "your Canva design tool"
+    linkedin: "your LinkedIn"
+    notion: "your Notion workspace"
+    whatsapp: "your WhatsApp"
+    youtube: "your YouTube"
+    google ads: "your Google Ads"
+    google analytics: "your Google Analytics"
+    meta: "your Facebook/Instagram ads"
+    facebook: "your Facebook"
+    instagram: "your Instagram"
+    seo: "your SEO work"
+    shopify: "online stores (your Shop vertical)"
+    wordpress: "websites you build"
+    n8n: "automation tools"
+    zapier: "automation tools"
+
+  # How the brief should phrase the 'get expert advice' helper, for a beginner.
+  ai_helpers_note: >
+    You can get free expert business advice: open Claude, type /billion-dollar-team,
+    and paste the grey box. Eight famous business experts will tell you what to do.

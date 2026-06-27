@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 import html
+import re
 from datetime import datetime, timezone, timedelta
 
+from bs4 import BeautifulSoup
+
+from .config_loader import profile as load_profile
 from .models import Finding
 
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -38,6 +42,29 @@ def _plain_verts(f: Finding) -> str:
     return ", ".join(dict.fromkeys(names)) or "your business"
 
 
+def _clean_summary(text: str, limit: int = 360) -> str:
+    """Strip HTML, collapse whitespace, trim at a sentence end so the email is self-contained."""
+    if not text:
+        return ""
+    plain = BeautifulSoup(text, "lxml").get_text(" ", strip=True)
+    plain = re.sub(r"\s+", " ", plain).strip()
+    if len(plain) <= limit:
+        return plain
+    cut = plain[:limit]
+    end = max(cut.rfind(". "), cut.rfind("! "), cut.rfind("? "))
+    return (cut[: end + 1] if end > limit * 0.5 else cut.rstrip() + "…")
+
+
+def _capability_note(f: Finding) -> str:
+    """If the news touches a tool the user already has, say so plainly."""
+    tools = (load_profile().get("tools_you_have") or {})
+    text = f"{f.title} {f.summary}".lower()
+    for key, label in tools.items():
+        if key in text:
+            return f"✅ **This touches {label} — so it's directly relevant to you.**"
+    return ""
+
+
 def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], risks: list[dict],
                          council_pack: str | None, run_at_utc: str) -> tuple[str, str]:
     """Plain-English brief for GitHub Issue delivery. Anyone can read it. Returns (title, body)."""
@@ -53,9 +80,16 @@ def daily_brief_markdown(findings: list[Finding], opportunities: list[dict], ris
     if notable:
         for i, f in enumerate(notable[:5], 1):
             tag = BAND_PLAIN.get(f.band, "")
-            L.append(f"**{i}. {f.title}**  \n"
-                     f"{FTYPE_PLAIN.get(f.ftype, 'News')} — about *{_plain_verts(f)}*. {tag}  \n"
-                     f"👉 [Read the full thing here]({f.url})\n")
+            summary = _clean_summary(f.summary)
+            cap = _capability_note(f)
+            block = [f"### {i}. {f.title}",
+                     f"_{FTYPE_PLAIN.get(f.ftype, 'News')} — about {_plain_verts(f)}. {tag}_\n"]
+            if summary:
+                block.append(f"**What happened:** {summary}\n")
+            if cap:
+                block.append(cap + "\n")
+            block.append(f"_Source: {f.source}. Want the original? [Open it here]({f.url})_\n")
+            L.append("\n".join(block))
     else:
         L.append("_Nothing major today. That's normal — quiet days happen._\n")
 

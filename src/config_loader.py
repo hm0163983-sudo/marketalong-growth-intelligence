@@ -32,3 +32,10 @@ def keywords() -> dict:
 
 def scoring() -> dict:
     return load("scoring_weights")
+
+
+def profile() -> dict:
+    try:
+        return load("profile").get("profile", {})
+    except FileNotFoundError:
+        return {}
